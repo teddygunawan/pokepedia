@@ -13,7 +13,11 @@
         >
           <base-pokemon-card :pokemon="pokemon">
             <template v-slot:options>
-              <a href="#" class="has-text-danger">
+              <a
+                href="#"
+                class="has-text-danger"
+                @click="releasePokemon(pokemon.id, pokemon.timeCaptured)"
+              >
                 <i class="fa fa-trash" aria-hidden="true"></i>
               </a>
             </template>
@@ -21,6 +25,11 @@
         </div>
       </div>
     </keep-alive>
+    <b-loading :is-full-page="true" :active.sync="isLoading"></b-loading>
+    <!-- TBD - SCROLL FETCH LOADING ANIMATION  -->
+    <!-- <div class="loading-container">
+      <b-loading :is-full-page="true" :active.sync="isLoading"></b-loading>
+    </div> -->
   </section>
 </template>
 <script>
@@ -37,7 +46,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('pokemons', ['pokemonList', 'pokemonCount']),
+    ...mapState('pokemons', ['pokemonList', 'pokemonCount', 'isLoading']),
     ...mapState('user', {
       userPokemonList: 'pokemonList'
     }),
@@ -47,7 +56,7 @@ export default {
       for (let id in this.userPokemonList) {
         for (let i = 0; i < this.userPokemonList[id].length; i++) {
           if (!this.pokemonList[id]) {
-            this.$store.dispatch('pokemons/fetchPokemonDetails', id)
+            this.$store.dispatch('pokemons/fetchPokemon', id)
           }
 
           let pokemon = {
@@ -70,8 +79,9 @@ export default {
         this.shownPokemonCount
       }
     },
-    releasePokemon() {
-      this.$store.dispatch('user/release')
+    releasePokemon(id, timeCaptured) {
+      let pokemonToRelease = { id: id, timeCaptured: timeCaptured }
+      this.$store.dispatch('user/releasePokemon', pokemonToRelease)
     }
   },
   mounted() {
@@ -83,4 +93,10 @@ export default {
 }
 </script>
 
-<style
+<style scoped>
+.loading-container {
+  height: 20vh;
+  width: 100%;
+  position: relative;
+}
+</style>

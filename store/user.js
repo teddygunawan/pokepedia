@@ -27,6 +27,7 @@ export const mutations = {
     })
 
     state.pokemonList[id].splice(index, 1)
+    localStorage.userPokemon = JSON.stringify(state.pokemonList)
   },
   REPLACE_POKEMONS(state, pokemonList) {
     state.pokemonList = pokemonList
@@ -44,7 +45,7 @@ export const actions = {
       commit('REPLACE_POKEMONS', JSON.parse(localStorage.userPokemon))
     }
   },
-  releasePokemon({ commit }, pokemon) {
-
+  releasePokemon({ commit }, pokemonToRelease) {
+    commit('REMOVE_CAPTURED_POKEMON', pokemonToRelease)
   }
 }

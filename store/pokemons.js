@@ -35,7 +35,7 @@ export const getters = {
 
     return nameList
   },
-  getPokemon(state, id){
+  getPokemon(state, id) {
     return state.pokemonList[id]
   }
 }
@@ -69,7 +69,7 @@ export const mutations = {
 export const actions = {
   async fetchPokemonMoves({ state, commit }, id) {
     /* Don't fetch the pokemon moves again if it already exist */
-    if(state.pokemonList[id].moves){
+    if (state.pokemonList[id].moves) {
       return
     }
     try {
@@ -109,6 +109,18 @@ export const actions = {
   async fetchPokemonDetails({ state, dispatch, commit }, id) {
     commit('TOGGLE_LOADING', true)
     if (!state.pokemonList[id]) {
+      await dispatch('fetchPokemon')
+    }
+    if ("moves" in state.pokemonList[id] == false) {
+      await dispatch('fetchPokemonMoves', id)
+    }
+
+    commit('TOGGLE_LOADING', false)
+    return state.pokemonList[id]
+  },
+  async fetchPokemon({ state, dispatch, commit }, id) {
+    commit('TOGGLE_LOADING', true)
+    if (!state.pokemonList[id]) {
       try {
         let responseData = await dispatch('pokemonRequests', id)
         commit('ADD_POKEMON', responseData)
@@ -117,10 +129,6 @@ export const actions = {
         console.log(error)
       }
     }
-    if ("moves" in state.pokemonList[id] == false) {
-      await dispatch('fetchPokemonMoves', id)
-    }
-
     commit('TOGGLE_LOADING', false)
     return state.pokemonList[id]
   },
