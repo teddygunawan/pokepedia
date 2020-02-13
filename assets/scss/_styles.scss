@@ -1,0 +1,12 @@
+.is-borderless {
+  border: none;
+}
+@media only screen and (max-width: $mobile) {
+  .pokemon-stats {
+    overflow-x: scroll;
+  }
+}
+
+// html{
+//     background-image: url(http://static.minitokyo.net/downloads/18/11/743068.jpg);
+// }

@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BasePokemonCard renders correctly 1`] = `
+<div
+  class="card"
+>
+  <div
+    class="card-image pokemon-image"
+  >
+    <figure
+      class="image is-4by3"
+    >
+      <nuxt-link
+        to="/pokemons/1"
+      >
+        <img
+          alt="Pokémon"
+          src="https://pokeres.bastionbot.org/images/pokemon/1"
+        />
+      </nuxt-link>
+    </figure>
+  </div>
+   
+  <header
+    class="card-header has-text-centered"
+  >
+    <p
+      class="card-header-title is-capitalized"
+    >
+      
+      bulbasaur
+      <br />
+    </p>
+  </header>
+   
+  <div
+    class="card-content"
+  >
+    <div
+      class="content"
+    >
+      <div
+        class="field has-addons"
+      />
+    </div>
+  </div>
+</div>
+`;
