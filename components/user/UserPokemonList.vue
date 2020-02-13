@@ -56,14 +56,14 @@ export default {
       for (let id in this.userPokemonList) {
         for (let i = 0; i < this.userPokemonList[id].length; i++) {
           if (!this.pokemonList[id]) {
-            this.$store.dispatch('pokemons/fetchPokemon', id)
+            this.$store.dispatch('pokemons/fetchPokemon', {id: id, detailed: false})
           }
 
           let pokemon = {
-            ...this.pokemonList[id],
-            ...this.userPokemonList[id][i]
+            ...this.userPokemonList[id][i],
+            ...this.pokemonList[id]
           }
-          pokemon.name = pokemon.nickName
+          pokemon.name = this.userPokemonList[id][i].nickName
           pokemonToDisplay.push(pokemon)
         }
       }
@@ -81,6 +81,7 @@ export default {
     },
     releasePokemon(id, timeCaptured) {
       let pokemonToRelease = { id: id, timeCaptured: timeCaptured }
+      console.log(pokemonToRelease)
       this.$store.dispatch('user/releasePokemon', pokemonToRelease)
     }
   },

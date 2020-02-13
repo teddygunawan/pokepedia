@@ -106,19 +106,7 @@ export const actions = {
   async fetchPokemonSpecies({ state, dispatch, commit }, id) {
 
   },
-  async fetchPokemonDetails({ state, dispatch, commit }, id) {
-    commit('TOGGLE_LOADING', true)
-    if (!state.pokemonList[id]) {
-      await dispatch('fetchPokemon')
-    }
-    if ("moves" in state.pokemonList[id] == false) {
-      await dispatch('fetchPokemonMoves', id)
-    }
-
-    commit('TOGGLE_LOADING', false)
-    return state.pokemonList[id]
-  },
-  async fetchPokemon({ state, dispatch, commit }, id) {
+  async fetchPokemon({ state, dispatch, commit }, { id, detailed }) {
     commit('TOGGLE_LOADING', true)
     if (!state.pokemonList[id]) {
       try {
@@ -127,6 +115,11 @@ export const actions = {
       } catch (error) {
         // TBD - HANDLE POSSIBLE ERRORS
         console.log(error)
+      }
+    }
+    if (detailed) {
+      if ("moves" in state.pokemonList[id] == false) {
+        await dispatch('fetchPokemonMoves', id)
       }
     }
     commit('TOGGLE_LOADING', false)
