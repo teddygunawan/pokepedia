@@ -34,13 +34,18 @@ export const getters = {
     }
 
     return nameList
+  },
+  getPokemon(state, id){
+    return state.pokemonList[id]
   }
 }
 
 export const mutations = {
   ADD_POKEMON(state, pokemon) {
     /* Doesn't increment pokemonCount as it will mess up the pokemon batch fetches */
-    state.pokemonList[pokemon.id] = pokemon
+    let newPokemon = {}
+    newPokemon[pokemon.id] = pokemon
+    state.pokemonList = Object.assign({}, state.pokemonList, newPokemon)
   },
   ADD_POKEMON_DETAILS(state, { id, key, details }) {
     state.pokemonList[id][key] = details
@@ -48,9 +53,6 @@ export const mutations = {
   APPEND_POKEMONS(state, pokemonList) {
     state.pokemonList = Object.assign({}, state.pokemonList, pokemonList)
     state.pokemonCount += Object.keys(pokemonList).length;
-    /* ARRAY IMPLEMENTATION IN CASE IF OBJECT IS SLOW */
-    // state.pokemonList = state.pokemonList.concat(pokemonList)
-    // state.pokemonCount += pokemonList.length
   },
   REPLACE_POKEMONS(state, pokemonList) {
     state.pokemonList = pokemonList
@@ -66,6 +68,10 @@ export const mutations = {
 
 export const actions = {
   async fetchPokemonMoves({ state, commit }, id) {
+    /* Don't fetch the pokemon moves again if it already exist */
+    if(state.pokemonList[id].moves){
+      return
+    }
     try {
       var response = await this.$axios.get(state.apiUri.pokemon + id)
     } catch (error) {

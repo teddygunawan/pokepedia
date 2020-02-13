@@ -1,6 +1,6 @@
 <template>
   <section>
-    <!-- TBD - IMPLEMENT VIRTUAL SCROLLING FOR FASTER UI -->
+    <!-- TBD - TRY TO SOMEHOW TO MAKE THIS REUSABLE BETWEEN POKEMON LIST AND USERPOKEMONLIST -->
     <keep-alive>
       <div class="columns is-multiline is-mobile">
         <div
@@ -10,9 +10,8 @@
         >
           <base-pokemon-card :pokemon="pokemon">
             <template v-slot:ownedCount>
-              Owned: {{ userPokemonList[index] ? userPokemonList[index].length : 0 }}
+              {{ userPokemonList[index] ? userPokemonList[index].length : 0 }}
             </template>
-            
           </base-pokemon-card>
         </div>
       </div>
@@ -30,11 +29,13 @@ export default {
   components: {
     BasePokemonCard
   },
-  computed: {
-    ...mapState('pokemons', ['pokemonList', 'pokemonCount', 'isLoading', 'pokemonEachRequest']),
-    ...mapState('user', {
-      userPokemonList: 'pokemonList'
-    })
+  props: {
+    pokemonList: { required: true },
+    pokemonEachRequest: { required: true },
+    pokemonCount: { required: true },
+    userPokemonList: { required: true },
+    isLoading: { required: true },
+    getNextPokemons:{required:true}
   },
   created() {
     if (this.pokemonCount < this.pokemonEachRequest) this.getNextPokemons()
@@ -47,9 +48,6 @@ export default {
       if (bottomOfWindow && !this.isLoading) {
         this.getNextPokemons()
       }
-    },
-    async getNextPokemons() {
-      await this.$store.dispatch('pokemons/fetchManyPokemons')
     }
   },
   mounted() {

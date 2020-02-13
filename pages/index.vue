@@ -18,7 +18,7 @@
 </template>
 <script>
 import PokemonList from '~/components/pokemons/PokemonList'
-import { mapGetters  } from 'vuex'
+import { mapGetters } from 'vuex'
 export default {
   components: {
     PokemonList
@@ -41,10 +41,9 @@ export default {
               .toLowerCase()
               .indexOf(this.pokemonSearch.toLowerCase()) >= 0
           )
-          
         })
       }
-    },
+    }
   }
 }
 </script>

@@ -1,6 +1,7 @@
 <template functional>
   <section>
     <h3 class="title is-3">Moves List</h3>
+    <!-- TBD - DO LAZY LOADING TO IMPROVE PERFORMANCE AND STOP SCREEN FROM FREEZING -->
     <b-table :data="props.pokemonMoves" :mobile-cards="true">
       <template slot-scope="props">
         <b-table-column field="level_requirement" label="Lv." sortable numeric>

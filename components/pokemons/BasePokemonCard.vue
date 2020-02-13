@@ -8,10 +8,13 @@
       </figure>
     </div>
     <header class="card-header">
-      <p class="card-header-title is-capitalized">{{ props.pokemon.name }}<br /></p>
+      <div class="card-header-title is-capitalized title is-4">
+        {{ props.pokemon.name }} <slot name="options"></slot>
+      </div>
     </header>
     <div class="card-content">
       <div class="content">
+        <div class="has-text-weight-semibold"><slot name="ownedCount"></slot></div>
         <div class="field has-addons">
           <p
             class="control is-marginless"
@@ -23,31 +26,17 @@
             </button>
           </p>
         </div>
-        <!-- <div class="buttons">
-          <b-button
-            rounded
-            :class="'type-' + pokemonType.type.name"
-            v-for="pokemonType in pokemon.types"
-            :key="pokemonType.slot"
-          >
-            {{ pokemonType.type.name }}
-          </b-button>
-        </div> -->
-        <!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus nec
-        iaculis mauris.
-        <a href="#">@bulmaio</a>. <a href="#">#css</a>
-        <a href="#">#responsive</a>
-        <br />
-        <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time> -->
       </div>
     </div>
+    <slot name="footer"></slot>
   </div>
 </template>
 
 <script>
 export default {
   props: {
-    pokemon: { required: true }
+    pokemon: { required: true },
+    ownedPokemonCount: { required: false }
   }
 }
 </script>
