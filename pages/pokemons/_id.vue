@@ -12,7 +12,7 @@
       <template v-for="(tab, index) in tabs"> </template>
     </b-tabs> -->
 
-    <template v-if="pokemon !== null && !isNotFound">
+    <template v-if="pokemon && !isNotFound">
       <div class="columns">
         <div class="column is-4 has-text-centered-touch">
           <img :src="pokemon.image" class="" />
@@ -64,20 +64,24 @@ export default {
   data() {
     return {
       pokemonId: this.$route.params.id,
-      pokemon: null,
+      // pokemon: null,
       description: '',
       isNotFound: false,
     }
   },
   async created() {
     /* TBD - SEPARATE THE LOAD FOR POKEMON AND MOVES FOR BETTER USABILITY */
-    this.pokemon = await this.$store.dispatch('pokemons/fetchPokemon', {id: this.pokemonId, detailed: true})
+    this.$store.dispatch('pokemons/fetchPokemon', {id: this.pokemonId, detailed: true})
     /* TBD - GET THE DESCRIPTION OF THE POKEMON. BELLOW IS THE CODE */
     // let temp = await this.$axios.get('https://pokeapi.co/api/v2/pokemon-species/' + this.pokemonId)
     // this.description = temp['data']['flavor_text_entries'][2].flavor_text
   },
   computed: {
-    ...mapState('pokemons', ['isLoading', 'dataKeys'])
+    ...mapState('pokemons', ['isLoading', 'dataKeys', 'pokemonList']),
+    pokemon(){
+      console.log(this.pokemonId)
+      return this.pokemonList[this.pokemonId]
+    }
   },
   methods: {
     capturePokemon() {

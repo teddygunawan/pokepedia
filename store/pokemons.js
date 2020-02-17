@@ -48,7 +48,8 @@ export const mutations = {
     state.pokemonList = Object.assign({}, state.pokemonList, newPokemon)
   },
   ADD_POKEMON_DETAILS(state, { id, key, details }) {
-    state.pokemonList[id][key] = details
+    state.pokemonList[id] = Object.assign({}, state.pokemonList[id], {[key]: details})
+    console.log(state.pokemonList[id])
   },
   APPEND_POKEMONS(state, pokemonList) {
     state.pokemonList = Object.assign({}, state.pokemonList, pokemonList)
@@ -68,10 +69,6 @@ export const mutations = {
 
 export const actions = {
   async fetchPokemonMoves({ state, commit }, id) {
-    /* Don't fetch the pokemon moves again if it already exist */
-    if (state.pokemonList[id].moves) {
-      return
-    }
     try {
       var response = await this.$axios.get(state.apiUri.pokemon + id)
     } catch (error) {
@@ -79,29 +76,40 @@ export const actions = {
       console.log(error)
       return error
     }
-    let moveList = []
-    response.data.moves.forEach(async function ({ move, version_group_details }) {
-      try {
-        let response = await this.$axios.get(move.url)
+    let requestList = []
+    let responseMoves = response.data.moves
+    let movesLength = responseMoves.length
+    let axios = this.$axios
+    for (let i = 0; i < movesLength; i++) {
+      requestList.push(responseMoves[i])
+    }
 
-        /* Retrieve only the necessary data keys based on state.dataKeys */
+    Promise.all(requestList.map(async function ({move, version_group_details}) {
+      try {
+        let response = await axios.get(move.url)
         let filteredData = Object.fromEntries(
           Object.entries(response.data).filter(([key]) => state.dataKeys.move.includes(key))
         )
-
+        
         // Process extra columns
         let pokemonMove = filteredData
         pokemonMove['level_requirement'] = version_group_details[0].level_learned_at
         pokemonMove['type'] = pokemonMove['type'].name
         pokemonMove['damage_class'] = pokemonMove['damage_class'].name
-        moveList.push(pokemonMove)
+        return pokemonMove
       } catch (error) {
-        /* TBD -- HANDLE THE POSSIBLE ERRORS */
         console.log(error)
         return error
       }
-    }, this)
-    commit('ADD_POKEMON_DETAILS', { id: id, key: 'moves', details: moveList })
+
+    }))
+      .then(function (moveList) {
+        console.log(moveList)
+        commit('ADD_POKEMON_DETAILS', { id: id, key: 'moves', details: moveList })
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
   },
   async fetchPokemonSpecies({ state, dispatch, commit }, id) {
 
@@ -117,45 +125,44 @@ export const actions = {
         console.log(error)
       }
     }
+
+    /* If the fetch require the detailed pokemon informations (e.g. moves, species, description) */
     if (detailed) {
       if ("moves" in state.pokemonList[id] == false) {
-        await dispatch('fetchPokemonMoves', id)
+        dispatch('fetchPokemonMoves', id)
       }
     }
     commit('TOGGLE_LOADING', false)
     return state.pokemonList[id]
   },
+  /* Make multiple parallel pokemonRequests and synchronise the http result data before comitting it to pokemonList */
   async fetchManyPokemons({ state, dispatch, commit }) {
     commit('TOGGLE_LOADING', true)
-    /* Make multiple parallel pokemonRequests and synchronise the http result data before comitting it to pokemonList */
     /* TBD - COMMIT EACH DATA INDIVIDUALLY ON PRODUCTION */
-    try {
-      let startId = state.pokemonCount + 1
-      let endId = state.pokemonCount + state.pokemonEachRequest
-      let requestList = async function () {
-        let pokemonData = {}
-        for (let id = startId; id <= endId; id++) {
-          try {
-            let response = await dispatch('pokemonRequests', id)
-            pokemonData[response.id] = response
-          } catch (error) {
-            console.log(error)
-            return pokemonData
-          }
-        }
-        return pokemonData
-      }
-      let responseData = await requestList()
-      commit('APPEND_POKEMONS', responseData)
-    } catch (error) {
-      // TBD - HANDLE POSSIBLE ERRORS
-      console.log(error)
+    let startId = state.pokemonCount + 1
+    let endId = state.pokemonCount + state.pokemonEachRequest
+    let requestList = []
+    for (let id = startId; id <= endId; id++) {
+      requestList.push(dispatch('pokemonRequests', id))
     }
-    commit('TOGGLE_LOADING', false)
-
+    Promise.all(requestList)
+      .then(function (responseData) {
+        /* Group the data by id before comitting */
+        let pokemonData = {}
+        responseData.forEach(response => {
+          pokemonData[response.id] = response
+        })
+        /* Commit the data and remove loading state */
+        commit('APPEND_POKEMONS', pokemonData)
+        commit('TOGGLE_LOADING', false)
+      })
+      .catch(function (error) {
+        // TBD - HANDLE POSSIBLE ERRORS
+        console.log(error)
+      })
   },
   /* Create http requests to the /pokemons API */
-  async pokemonRequests({ state }, id) {
+  async pokemonRequests({ state, commit }, id) {
     try {
       let response = await this.$axios.get(state.apiUri.pokemon + id)
 
@@ -163,7 +170,6 @@ export const actions = {
       let filteredData = Object.fromEntries(
         Object.entries(response.data).filter(([key]) => state.dataKeys.pokemon.includes(key))
       )
-
       let pokemon = {
         ...filteredData,
         image: state.apiUri.pokemonImg + id + '.png'
