@@ -2,7 +2,7 @@
   <section>
     <h3 class="title is-3">Moves List</h3>
     <!-- TBD - DO LAZY LOADING TO IMPROVE PERFORMANCE AND STOP SCREEN FROM FREEZING -->
-    <b-table :data="props.pokemonMoves" :mobile-cards="true">
+    <b-table :data="props.pokemonMoves" :mobile-cards="true" :loading="props.isLoading" :paginated="true" :pagination-size="'is-large'" per-page="10">
       <template slot-scope="props">
         <b-table-column field="level_requirement" label="Lv." sortable numeric>
           <span class="is-capitalized">{{ props.row.level_requirement }}</span>
@@ -43,7 +43,8 @@
 <script>
 export default {
   props: {
-    pokemonMoves: { required: true }
+    pokemonMoves: { required: true },
+    isLoading: {required: true}
   }
 }
 </script>

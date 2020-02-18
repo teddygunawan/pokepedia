@@ -39,11 +39,11 @@
       </div>
       <div class="columns">
         <div class="column is-three-quarters">
-          <base-pokemon-moves :pokemonMoves="pokemon.moves" />
+          <base-pokemon-moves :pokemonMoves="pokemon.moves" :isLoading="isLoading.moves" />
         </div>
       </div>
     </template>
-    <b-loading :active.sync="isLoading" :can-cancel="false"></b-loading>
+    <b-loading :active.sync="isLoading.pokemon" :can-cancel="false"></b-loading>
   </section>
 </template>
 
@@ -64,22 +64,31 @@ export default {
   data() {
     return {
       pokemonId: this.$route.params.id,
-      // pokemon: null,
       description: '',
       isNotFound: false,
+      isLoading: {
+        pokemon: false,
+        moves: false
+      }
     }
   },
   async created() {
-    /* TBD - SEPARATE THE LOAD FOR POKEMON AND MOVES FOR BETTER USABILITY */
-    this.$store.dispatch('pokemons/fetchPokemon', {id: this.pokemonId, detailed: true})
-    /* TBD - GET THE DESCRIPTION OF THE POKEMON. BELLOW IS THE CODE */
+    /* TBD - GET THE DESCRIPTION OF THE POKEMON. BELOW IS THE CODE */
+    if (!this.pokemon) {
+      await this.getPokemon()
+      this.getPokemonMoves()
+    }else{
+      if(!this.pokemon.moves){
+        this.getPokemonMoves()
+      }
+    }
+
     // let temp = await this.$axios.get('https://pokeapi.co/api/v2/pokemon-species/' + this.pokemonId)
     // this.description = temp['data']['flavor_text_entries'][2].flavor_text
   },
   computed: {
-    ...mapState('pokemons', ['isLoading', 'dataKeys', 'pokemonList']),
-    pokemon(){
-      console.log(this.pokemonId)
+    ...mapState('pokemons', ['dataKeys', 'pokemonList']),
+    pokemon() {
       return this.pokemonList[this.pokemonId]
     }
   },
@@ -104,8 +113,18 @@ export default {
           pokemonName: this.pokemon.name,
           pokemonId: this.pokemonId
         },
-        "can-cancel": ['escape', 'x']
+        'can-cancel': ['escape', 'x']
       })
+    },
+    async getPokemon() {
+      this.isLoading.pokemon = true
+      await this.$store.dispatch('pokemons/fetchPokemon', this.pokemonId)
+      this.isLoading.pokemon = false
+    },
+    async getPokemonMoves() {
+      this.isLoading.moves = true
+      await this.$store.dispatch('pokemons/fetchPokemonMoves', this.pokemonId)
+      this.isLoading.moves = false
     }
   }
 }

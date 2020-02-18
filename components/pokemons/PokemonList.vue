@@ -12,7 +12,6 @@
             <template v-slot:ownedCount>
               Owned: {{ userPokemonList[index] ? userPokemonList[index].length : 0 }}
             </template>
-            
           </base-pokemon-card>
         </div>
       </div>
@@ -30,8 +29,13 @@ export default {
   components: {
     BasePokemonCard
   },
+  data() {
+    return {
+      isLoading: false
+    }
+  },
   computed: {
-    ...mapState('pokemons', ['pokemonList', 'pokemonCount', 'isLoading', 'pokemonEachRequest']),
+    ...mapState('pokemons', ['pokemonList', 'pokemonCount', 'pokemonEachRequest']),
     ...mapState('user', {
       userPokemonList: 'pokemonList'
     })
@@ -49,7 +53,9 @@ export default {
       }
     },
     async getNextPokemons() {
+      this.isLoading = true
       await this.$store.dispatch('pokemons/fetchManyPokemons')
+      this.isLoading = false
     }
   },
   mounted() {
@@ -63,8 +69,12 @@ export default {
 
 <style scoped>
 .loading-container {
+  margin-top: 10vh;
   height: 20vh;
   width: 100%;
   position: relative;
+}
+.loading-icon {
+  font-size: 2em;
 }
 </style>

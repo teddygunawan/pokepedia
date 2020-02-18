@@ -56,7 +56,7 @@ export default {
       for (let id in this.userPokemonList) {
         for (let i = 0; i < this.userPokemonList[id].length; i++) {
           if (!this.pokemonList[id]) {
-            this.$store.dispatch('pokemons/fetchPokemon', {id: id, detailed: false})
+            this.$store.dispatch('pokemons/fetchPokemon', id)
           }
 
           let pokemon = {
@@ -81,7 +81,6 @@ export default {
     },
     releasePokemon(id, timeCaptured) {
       let pokemonToRelease = { id: id, timeCaptured: timeCaptured }
-      console.log(pokemonToRelease)
       this.$store.dispatch('user/releasePokemon', pokemonToRelease)
     }
   },

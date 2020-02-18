@@ -22,8 +22,7 @@ export const state = () => ({
     ],
     move: ['name', 'power', 'pp', 'type', 'damage_class', 'accuracy']
   },
-  isOverquota: false,
-  isLoading: false
+  isOverquota: false
 })
 
 export const getters = {
@@ -48,8 +47,7 @@ export const mutations = {
     state.pokemonList = Object.assign({}, state.pokemonList, newPokemon)
   },
   ADD_POKEMON_DETAILS(state, { id, key, details }) {
-    state.pokemonList[id] = Object.assign({}, state.pokemonList[id], {[key]: details})
-    console.log(state.pokemonList[id])
+    state.pokemonList[id] = Object.assign({}, state.pokemonList[id], { [key]: details })
   },
   APPEND_POKEMONS(state, pokemonList) {
     state.pokemonList = Object.assign({}, state.pokemonList, pokemonList)
@@ -61,9 +59,6 @@ export const mutations = {
   },
   TOGGLE_OVERQUOTA(state, overquotaStatus) {
     state.isOverquota = overquotaStatus
-  },
-  TOGGLE_LOADING(state, isLoadingStatus) {
-    state.isLoading = isLoadingStatus
   }
 }
 
@@ -84,13 +79,13 @@ export const actions = {
       requestList.push(responseMoves[i])
     }
 
-    Promise.all(requestList.map(async function ({move, version_group_details}) {
+    let movesRequest = async function ({ move, version_group_details }) {
       try {
         let response = await axios.get(move.url)
         let filteredData = Object.fromEntries(
           Object.entries(response.data).filter(([key]) => state.dataKeys.move.includes(key))
         )
-        
+
         // Process extra columns
         let pokemonMove = filteredData
         pokemonMove['level_requirement'] = version_group_details[0].level_learned_at
@@ -101,10 +96,9 @@ export const actions = {
         console.log(error)
         return error
       }
-
-    }))
+    }
+    await Promise.all(requestList.map(movesRequest))
       .then(function (moveList) {
-        console.log(moveList)
         commit('ADD_POKEMON_DETAILS', { id: id, key: 'moves', details: moveList })
       })
       .catch(function (error) {
@@ -114,8 +108,7 @@ export const actions = {
   async fetchPokemonSpecies({ state, dispatch, commit }, id) {
 
   },
-  async fetchPokemon({ state, dispatch, commit }, { id, detailed }) {
-    commit('TOGGLE_LOADING', true)
+  async fetchPokemon({ state, dispatch, commit }, id) {
     if (!state.pokemonList[id]) {
       try {
         let responseData = await dispatch('pokemonRequests', id)
@@ -126,18 +119,10 @@ export const actions = {
       }
     }
 
-    /* If the fetch require the detailed pokemon informations (e.g. moves, species, description) */
-    if (detailed) {
-      if ("moves" in state.pokemonList[id] == false) {
-        dispatch('fetchPokemonMoves', id)
-      }
-    }
-    commit('TOGGLE_LOADING', false)
     return state.pokemonList[id]
   },
   /* Make multiple parallel pokemonRequests and synchronise the http result data before comitting it to pokemonList */
   async fetchManyPokemons({ state, dispatch, commit }) {
-    commit('TOGGLE_LOADING', true)
     /* TBD - COMMIT EACH DATA INDIVIDUALLY ON PRODUCTION */
     let startId = state.pokemonCount + 1
     let endId = state.pokemonCount + state.pokemonEachRequest
@@ -145,16 +130,15 @@ export const actions = {
     for (let id = startId; id <= endId; id++) {
       requestList.push(dispatch('pokemonRequests', id))
     }
-    Promise.all(requestList)
+    await Promise.all(requestList)
       .then(function (responseData) {
         /* Group the data by id before comitting */
         let pokemonData = {}
         responseData.forEach(response => {
           pokemonData[response.id] = response
         })
-        /* Commit the data and remove loading state */
+
         commit('APPEND_POKEMONS', pokemonData)
-        commit('TOGGLE_LOADING', false)
       })
       .catch(function (error) {
         // TBD - HANDLE POSSIBLE ERRORS
