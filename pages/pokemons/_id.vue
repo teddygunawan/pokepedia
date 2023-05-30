@@ -17,7 +17,7 @@
         <div class="column is-4 has-text-centered-touch">
           <img :src="pokemon.image" class="" />
         </div>
-        <div class="has-text-centered is-invisible-desktop">
+        <div class="has-text-centered is-invisible-tablet">
           <b-button type="is-danger" size="is-large" @click="capturePokemon" outlined>
             <i class="far fa-dot-circle"></i> Capture!
           </b-button>
@@ -25,7 +25,7 @@
         <div class="column is-4 is-paddingless">
           <pokemon-features :pokemon="pokemon" />
 
-          <div class="has-text-centered is-invisible-touch">
+          <div class="has-text-centered is-hidden-mobile">
             <b-button type="is-danger" size="is-large" @click="capturePokemon" outlined>
               <i class="far fa-dot-circle"></i> Capture!
             </b-button>

@@ -4,7 +4,7 @@ export const state = () => ({
   pokemonEachRequest: 12,
   apiUri: {
     pokemon: 'https://pokeapi.co/api/v2/pokemon/',
-    pokemonImg: 'https://pokeres.bastionbot.org/images/pokemon/',
+    pokemonImg: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/',
     pokemonSpecies: 'https://pokeapi.co/api/v2/pokemon-species/',
     move: 'https://pokeapi.co/api/v2/move/'
   },
